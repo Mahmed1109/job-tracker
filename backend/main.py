@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
+from typing import List
 from backend.database import engine, SessionLocal
 from backend import models, schemas
 
@@ -35,3 +36,8 @@ def create_application(application: schemas.JobApplicationCreate, db: Session = 
     db.commit()
     db.refresh(db_application)
     return db_application
+
+@app.get("/applications/", response_model=List[schemas.JobApplicationResponse])
+def get_applications(db: Session = Depends(get_db)):
+    applications = db.query(models.JobApplication).all()
+    return applications
