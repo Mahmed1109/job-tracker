@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from backend.database import engine, SessionLocal
@@ -41,3 +41,12 @@ def create_application(application: schemas.JobApplicationCreate, db: Session = 
 def get_applications(db: Session = Depends(get_db)):
     applications = db.query(models.JobApplication).all()
     return applications
+
+@app.get("/applications/{application_id}", response_model=schemas.JobApplicationResponse)
+def get_application(application_id: int, db: Session = Depends(get_db)):
+    application = db.query(models.JobApplication).filter(
+        models.JobApplication.id == application_id
+    ).first()
+    if application is None:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return application
