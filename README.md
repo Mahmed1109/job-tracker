@@ -1,7 +1,7 @@
 # Job Application Tracker
 
 A full-stack web app to track job applications, monitor statuses,
-set follow-up reminders, and visualize your job search pipeline.
+set follow-up reminders, and visualise your job search pipeline.
 
 ## Tech Stack
 

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from backend.database import engine, SessionLocal
 from backend import models, schemas
 
@@ -49,4 +49,24 @@ def get_application(application_id: int, db: Session = Depends(get_db)):
     ).first()
     if application is None:
         raise HTTPException(status_code=404, detail="Application not found")
+    return application
+
+@app.put("/applications/{application_id}", response_model=schemas.JobApplicationResponse)
+def update_application(application_id: int, updated: schemas.JobApplicationCreate, db: Session = Depends(get_db)):
+    application = db.query(models.JobApplication).filter(
+        models.JobApplication.id == application_id
+    ).first()
+    if application is None:
+        raise HTTPException(status_code=404, detail="Application not found")
+    application.company = updated.company
+    application.job_title = updated.job_title
+    application.status = updated.status
+    application.job_url = updated.job_url
+    application.location = updated.location
+    application.salary = updated.salary
+    application.notes = updated.notes
+    application.date_applied = updated.date_applied
+    application.follow_up_date = updated.follow_up_date
+    db.commit()
+    db.refresh(application)
     return application
