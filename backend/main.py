@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List
 from backend.database import engine, SessionLocal
 from backend import models, schemas
 
@@ -70,3 +70,14 @@ def update_application(application_id: int, updated: schemas.JobApplicationCreat
     db.commit()
     db.refresh(application)
     return application
+
+@app.delete("/applications/{application_id}")
+def delete_application(application_id: int, db: Session = Depends(get_db)):
+    application = db.query(models.JobApplication).filter(
+        models.JobApplication.id == application_id
+    ).first()
+    if application is None:
+        raise HTTPException(status_code=404, detail="Application not found")
+    db.delete(application)
+    db.commit()
+    return {"message": f"Application {application_id} deleted successfully"}
