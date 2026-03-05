@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from backend.database import engine, SessionLocal
 from backend import models, schemas
 
@@ -38,8 +38,14 @@ def create_application(application: schemas.JobApplicationCreate, db: Session = 
     return db_application
 
 @app.get("/applications/", response_model=List[schemas.JobApplicationResponse])
-def get_applications(db: Session = Depends(get_db)):
-    applications = db.query(models.JobApplication).all()
+def get_applications(
+    status: Optional[str] = Query(None, description="Filter by status: Applied, Interview, Offer, Rejected"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.JobApplication)
+    if status:
+        query = query.filter(models.JobApplication.status == status)
+    applications = query.all()
     return applications
 
 @app.get("/applications/{application_id}", response_model=schemas.JobApplicationResponse)
