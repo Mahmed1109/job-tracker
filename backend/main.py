@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import date
 from backend.database import engine, SessionLocal
 from backend import models, schemas
 
@@ -46,6 +47,15 @@ def get_applications(
     if status:
         query = query.filter(models.JobApplication.status == status)
     applications = query.all()
+    return applications
+
+@app.get("/applications/overdue", response_model=List[schemas.JobApplicationResponse])
+def get_overdue_applications(db: Session = Depends(get_db)):
+    today = date.today()
+    applications = db.query(models.JobApplication).filter(
+        models.JobApplication.follow_up_date < today,
+        models.JobApplication.status.notin_(["Offer", "Rejected"])
+    ).all()
     return applications
 
 @app.get("/applications/{application_id}", response_model=schemas.JobApplicationResponse)
