@@ -38,6 +38,33 @@ def create_application(application: schemas.JobApplicationCreate, db: Session = 
     db.refresh(db_application)
     return db_application
 
+@app.get("/applications/overdue", response_model=List[schemas.JobApplicationResponse])
+def get_overdue_applications(db: Session = Depends(get_db)):
+    today = date.today()
+    applications = db.query(models.JobApplication).filter(
+        models.JobApplication.follow_up_date < today,
+        models.JobApplication.status.notin_(["Offer", "Rejected"])
+    ).all()
+    return applications
+
+@app.get("/applications/stats")
+def get_stats(db: Session = Depends(get_db)):
+    total = db.query(models.JobApplication).count()
+    applied = db.query(models.JobApplication).filter(models.JobApplication.status == "Applied").count()
+    interview = db.query(models.JobApplication).filter(models.JobApplication.status == "Interview").count()
+    offer = db.query(models.JobApplication).filter(models.JobApplication.status == "Offer").count()
+    rejected = db.query(models.JobApplication).filter(models.JobApplication.status == "Rejected").count()
+    response_rate = round((interview + offer) / total * 100, 1) if total > 0 else 0
+
+    return {
+        "total_applications": total,
+        "applied": applied,
+        "interview": interview,
+        "offer": offer,
+        "rejected": rejected,
+        "response_rate_percent": response_rate
+    }
+
 @app.get("/applications/", response_model=List[schemas.JobApplicationResponse])
 def get_applications(
     status: Optional[str] = Query(None, description="Filter by status: Applied, Interview, Offer, Rejected"),
@@ -47,15 +74,6 @@ def get_applications(
     if status:
         query = query.filter(models.JobApplication.status == status)
     applications = query.all()
-    return applications
-
-@app.get("/applications/overdue", response_model=List[schemas.JobApplicationResponse])
-def get_overdue_applications(db: Session = Depends(get_db)):
-    today = date.today()
-    applications = db.query(models.JobApplication).filter(
-        models.JobApplication.follow_up_date < today,
-        models.JobApplication.status.notin_(["Offer", "Rejected"])
-    ).all()
     return applications
 
 @app.get("/applications/{application_id}", response_model=schemas.JobApplicationResponse)
