@@ -95,6 +95,15 @@
             background-color: #3d5166;
         }
 
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+        }
+
         .applications-table {
             background: white;
             border-radius: 10px;
@@ -137,6 +146,89 @@
             margin-top: 10px;
             font-size: 0.9rem;
         }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 9px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2c3e50;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 
@@ -177,7 +269,7 @@
 
         <div class="section-header">
             <h2>Applications</h2>
-            <button class="btn btn-primary">+ Add Application</button>
+            <button class="btn btn-primary" onclick="openModal()">+ Add Application</button>
         </div>
 
         <div class="applications-table">
@@ -205,6 +297,69 @@
         </div>
 
     </div>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <h2 id="modal-title">Add Application</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Company *</label>
+                    <input type="text" id="input-company" placeholder="e.g. Google">
+                </div>
+                <div class="form-group">
+                    <label>Job Title *</label>
+                    <input type="text" id="input-job-title" placeholder="e.g. Software Engineer">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="input-status">
+                        <option value="Applied">Applied</option>
+                        <option value="Interview">Interview</option>
+                        <option value="Offer">Offer</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="input-location" placeholder="e.g. London">
+                </div>
+                <div class="form-group">
+                    <label>Salary</label>
+                    <input type="text" id="input-salary" placeholder="e.g. £50,000">
+                </div>
+                <div class="form-group">
+                    <label>Date Applied</label>
+                    <input type="date" id="input-date-applied">
+                </div>
+                <div class="form-group">
+                    <label>Follow Up Date</label>
+                    <input type="date" id="input-follow-up-date">
+                </div>
+                <div class="form-group">
+                    <label>Job URL</label>
+                    <input type="text" id="input-job-url" placeholder="e.g. linkedin.com/jobs/...">
+                </div>
+                <div class="form-group full-width">
+                    <label>Notes</label>
+                    <textarea id="input-notes" placeholder="Any notes about this application..."></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveApplication()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('modal-overlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+        }
+    </script>
 
 </body>
 
