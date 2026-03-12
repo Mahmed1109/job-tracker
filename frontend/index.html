@@ -352,13 +352,120 @@
     </div>
 
     <script>
-        function openModal() {
+        const API = 'http://127.0.0.1:8000';
+        let editingId = null;
+
+        function openModal(app = null) {
+            editingId = null;
+            document.getElementById('modal-title').textContent = 'Add Application';
+            clearForm();
+            if (app) {
+                editingId = app.id;
+                document.getElementById('modal-title').textContent = 'Edit Application';
+                document.getElementById('input-company').value = app.company || '';
+                document.getElementById('input-job-title').value = app.job_title || '';
+                document.getElementById('input-status').value = app.status || 'Applied';
+                document.getElementById('input-location').value = app.location || '';
+                document.getElementById('input-salary').value = app.salary || '';
+                document.getElementById('input-date-applied').value = app.date_applied || '';
+                document.getElementById('input-follow-up-date').value = app.follow_up_date || '';
+                document.getElementById('input-job-url').value = app.job_url || '';
+                document.getElementById('input-notes').value = app.notes || '';
+            }
             document.getElementById('modal-overlay').classList.add('active');
         }
 
         function closeModal() {
             document.getElementById('modal-overlay').classList.remove('active');
         }
+
+        function clearForm() {
+            document.getElementById('input-company').value = '';
+            document.getElementById('input-job-title').value = '';
+            document.getElementById('input-status').value = 'Applied';
+            document.getElementById('input-location').value = '';
+            document.getElementById('input-salary').value = '';
+            document.getElementById('input-date-applied').value = '';
+            document.getElementById('input-follow-up-date').value = '';
+            document.getElementById('input-job-url').value = '';
+            document.getElementById('input-notes').value = '';
+        }
+
+        async function saveApplication() {
+            const company = document.getElementById('input-company').value.trim();
+            const job_title = document.getElementById('input-job-title').value.trim();
+
+            if (!company || !job_title) {
+                alert('Company and Job Title are required.');
+                return;
+            }
+
+            const payload = {
+                company,
+                job_title,
+                status: document.getElementById('input-status').value,
+                location: document.getElementById('input-location').value || null,
+                salary: document.getElementById('input-salary').value || null,
+                date_applied: document.getElementById('input-date-applied').value || null,
+                follow_up_date: document.getElementById('input-follow-up-date').value || null,
+                job_url: document.getElementById('input-job-url').value || null,
+                notes: document.getElementById('input-notes').value || null,
+            };
+
+            const url = editingId
+                ? `${API}/applications/${editingId}`
+                : `${API}/applications/`;
+
+            const method = editingId ? 'PUT' : 'POST';
+
+            await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            closeModal();
+            loadApplications();
+            loadStats();
+        }
+
+        async function loadApplications() {
+            const res = await fetch(`${API}/applications/`);
+            const data = await res.json();
+            const tbody = document.getElementById('applications-body');
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><p>No applications yet. Add your first one!</p></div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(app => `
+                <tr>
+                    <td>${app.company}</td>
+                    <td>${app.job_title}</td>
+                    <td>${app.status}</td>
+                    <td>${app.date_applied || '—'}</td>
+                    <td>${app.follow_up_date || '—'}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick='openModal(${JSON.stringify(app)})'>Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadStats() {
+            const res = await fetch(`${API}/applications/stats`);
+            const data = await res.json();
+            document.getElementById('stat-total').textContent = data.total_applications;
+            document.getElementById('stat-applied').textContent = data.applied;
+            document.getElementById('stat-interview').textContent = data.interview;
+            document.getElementById('stat-offer').textContent = data.offer;
+            document.getElementById('stat-rejected').textContent = data.rejected;
+            document.getElementById('stat-response-rate').textContent = data.response_rate_percent + '%';
+        }
+
+        loadApplications();
+        loadStats();
     </script>
 
 </body>
