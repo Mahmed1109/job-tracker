@@ -229,6 +229,46 @@
             gap: 10px;
             margin-top: 20px;
         }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-applied {
+            background-color: #e8f0fe;
+            color: #1a56db;
+        }
+
+        .badge-interview {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge-offer {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+
+        .badge-rejected {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .stat-card.highlight-interview h3 {
+            color: #d97706;
+        }
+
+        .stat-card.highlight-offer h3 {
+            color: #059669;
+        }
+
+        .stat-card.highlight-rejected h3 {
+            color: #dc2626;
+        }
     </style>
 </head>
 
@@ -249,15 +289,15 @@
                 <h3 id="stat-applied">0</h3>
                 <p>Applied</p>
             </div>
-            <div class="stat-card">
+            <div class="stat-card highlight-interview">
                 <h3 id="stat-interview">0</h3>
                 <p>Interviews</p>
             </div>
-            <div class="stat-card">
+            <div class="stat-card highlight-offer">
                 <h3 id="stat-offer">0</h3>
                 <p>Offers</p>
             </div>
-            <div class="stat-card">
+            <div class="stat-card highlight-rejected">
                 <h3 id="stat-rejected">0</h3>
                 <p>Rejected</p>
             </div>
@@ -355,6 +395,17 @@
         const API = 'http://127.0.0.1:8000';
         let editingId = null;
 
+        function getBadge(status) {
+            const map = {
+                'Applied': 'badge-applied',
+                'Interview': 'badge-interview',
+                'Offer': 'badge-offer',
+                'Rejected': 'badge-rejected'
+            };
+            const cls = map[status] || 'badge-applied';
+            return `<span class="badge ${cls}">${status}</span>`;
+        }
+
         function openModal(app = null) {
             editingId = null;
             document.getElementById('modal-title').textContent = 'Add Application';
@@ -443,7 +494,7 @@
                 <tr>
                     <td>${app.company}</td>
                     <td>${app.job_title}</td>
-                    <td>${app.status}</td>
+                    <td>${getBadge(app.status)}</td>
                     <td>${app.date_applied || '—'}</td>
                     <td>${app.follow_up_date || '—'}</td>
                     <td>
