@@ -658,9 +658,13 @@
             }
         }
 
-        loadOverdue();
-        loadApplications();
-        loadStats();
+        async function init() {
+            await loadOverdue();
+            await loadApplications();
+            await loadStats();
+        }
+
+        init();
     </script>
 
 </body>
